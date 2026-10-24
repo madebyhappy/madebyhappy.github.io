@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Made by Happy</title>
+  <meta name="description" id="metaDesc" content="Happy 做出来的有用或有趣的东西。" />
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="stylesheet" href="styles.css?v=2" />
+</head>
+<body>
+  <nav class="nav">
+    <div class="wrap">
+      <a class="brand" href="index.html">Made <span class="by">by</span> Happy<span class="dot">.</span></a>
+      <div class="nav-right">
+        <div class="nav-links">
+          <a href="#works" id="navWorks"></a>
+          <a href="#about" id="navAbout"></a>
+        </div>
+        <!-- 语言切换：默认跟随浏览器语言，选择后记住 -->
+        <div class="lang-toggle" id="langToggle" role="group" aria-label="Language">
+          <button type="button" data-lang="zh">中</button>
+          <button type="button" data-lang="en">EN</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="wrap">
+      <h1 id="heroTitle"></h1>
+      <p id="heroSub"></p>
+    </div>
+  </header>
+
+  <main>
+    <!-- ---------------- WORKS ---------------- -->
+    <section class="section" id="works">
+      <div class="wrap">
+        <div class="section-head">
+          <h2><span id="worksLabel"></span> <span class="count" id="work-count"></span></h2>
+        </div>
+
+        <!-- 分类筛选：由 JS 根据分类 key 自动生成，新增作品自动出现新分类 -->
+        <div class="filters" id="filters"></div>
+
+        <!-- 作品卡片：由 JS 从 PROJECTS 数据渲染（中/英双语） -->
+        <div class="cards" id="cards">
+          <div class="col"></div>
+          <div class="col"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------------- ABOUT ---------------- -->
+    <section class="section" id="about">
+      <div class="wrap">
+        <div class="section-head"><h2 id="aboutTitle"></h2></div>
+        <div class="about-body">
+          <p id="about1"></p>
+          <p id="about2"></p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap" style="width:100%;">
+      <span>© <span id="year"></span> Happy</span>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    /* ==================== 国际化数据 ==================== */
+
+    // 分类：用语言无关的 key，展示文案随语言切换
+    const CATS = {
+      chrome:  { zh: 'Chrome 插件',  en: 'Chrome Extension' },
+    };
+
+    // 界面文案
+    const UI = {
+      zh: {
+        htmlLang: 'zh-CN',
+        navWorks: '作品',
+        navAbout: '关于',
+        heroTitle: '一些有趣的东西和想法<span class="dot">。</span>',
+        heroSub: '人生的意义就在于思考和折腾！',
+        works: '作品',
+        about: '关于',
+        all: '全部',
+        thoughts: '我的想法：',
+        metaDesc: 'Happy 做出来的有用或有趣的东西。',
+        about1: '我是 Happy。我喜欢尝试，喜欢捣鼓可能性，喜欢把日常里「要是有个 xx 就好了」的念头变成现实。所以我把所有我做出来的、有用或者有趣的东西都放在这里，也会在这里记录一些想法。',
+        about2: '我喜欢体验，喜欢故事。所以我喜欢主题乐园、单口喜剧、情景喜剧、和音乐剧。更大范围来说，我享受电影电视、播客、音乐。哦对了，我还很喜欢吃，尤其喜欢咖啡。',
+      },
+      en: {
+        htmlLang: 'en',
+        navWorks: 'Works',
+        navAbout: 'About',
+        heroTitle: 'Some fun things and ideas<span class="dot">.</span>',
+        heroSub: 'The meaning of life is to think and tinker!',
+        works: 'Works',
+        about: 'About',
+        all: 'All',
+        thoughts: 'My thoughts: ',
+        metaDesc: 'Useful or fun things that Happy has built.',
+        about1: "I'm Happy. I love experimenting, tinkering with possibilities, and turning those everyday “I wish there were an xx” thoughts into reality. So I put everything I've built — useful or just fun — right here, along with some of the thinking behind them.",
+        about2: "I love experiences, and I love stories. That's why I'm into theme parks, stand-up comedy, sitcoms, and musicals. More broadly, I enjoy film and TV, podcasts, and music. Oh, and I really love to eat — especially coffee.",
+      },
+    };
+
+    // 作品数据（中/英双语）
+    // 文字 logo：标题处用图片替换文字，浅色/深色模式各一张
+    const wm = (name, alt, h) =>
+      '<picture><source media="(prefers-color-scheme: dark)" srcset="img/' + name + '-dark.svg">' +
+      '<img class="wm" src="img/' + name + '.svg" alt="' + alt + '" height="' + h + '"></picture>';
+    const LOGOS = {
+      happysubs: wm('happysubs-wordmark', 'HappySubs', 20),
+      wisebird: wm('wisebird-wordmark', 'Wisebird 择木', 22),
+    };
+
+    const PROJECTS = [
+      {
+        cat: 'chrome',
+        titleHref: '/happysubs/',
+        logo: 'happysubs',
+        title: { zh: '双语字幕', en: 'Dual Subtitles for YouTube, Vimeo and Bilibili' },
+        desc: {
+          zh: '在 YouTube、Vimeo、B 站上同时显示两种语言的字幕。用视频自带字幕或 Google 免费翻译，也可选用AI做更高精度的翻译。本身没有字幕的视频，可以边播边听译。',
+          en: 'Show subtitles in two languages at once on YouTube, Vimeo and Bilibili. Use the video’s own captions or free Google Translate, or switch to AI for higher-accuracy translation. Videos that have no subtitles of their own can be transcribed as they play.',
+        },
+        think: {
+          zh: '做的原因是之前一直用得好好的双语字幕插件被油管 ban 了 :( ，自带字幕只能显示单语言。后面朋友启发我用了 API 翻译，确实翻译效果更好了～ 后续同步到Vimeo和B站啦，还针对B站的生肉视频们设计了实时听译功能。',
+          en: 'I built it because the dual-subtitle extension I’d happily used forever got banned by YouTube :( and the built-in captions only show one language. Later a friend nudged me to try API translation, which really does work better～ After that I brought it over to Vimeo and Bilibili, and built live transcription for all those raw, subtitle-less videos on Bilibili.',
+        },
+        linkText: { zh: '项目主页', en: 'Project page' },
+        storeHref: 'https://chromewebstore.google.com/detail/malocefbdblplamcmmmpilepcgllfmnf',
+        storeText: { zh: '在 Chrome 应用商店安装', en: 'Get it on the Chrome Web Store' },
+      },
+      {
+        cat: 'chrome',
+        titleHref: '/wisebird/',
+        icon: 'img/wisebird-icon.png',
+        logo: 'wisebird',
+        title: { zh: '', en: '' },
+        desc: {
+          zh: '看岗位的时候点一下，就知道值不值得投。在 LinkedIn、Handshake 或任何带岗位描述的页面上，对照你的简历打分，查 OPT / STEM OPT / H-1B 信号，揪出「仅限公民」这类红旗，再给一段中文要点。支持一次批量筛选多个岗位。',
+          en: 'Click once while browsing a job posting to know whether it’s worth applying. On LinkedIn, Handshake or any page with a job description, it scores the role against your résumé, checks OPT / STEM OPT / H-1B signals, flags red flags like “U.S. citizens only”, and gives you a short summary in Chinese. It can also pre-screen a whole batch of postings at once.',
+        },
+        think: {
+          zh: '名字来自「良禽择木而栖」：聪明的鸟儿落脚之前，会先看看这棵树值不值得。投简历也一样，早起的鸟儿有虫吃，但聪明的鸟儿先择木。目前是抢先体验阶段，可以在项目主页直接下载 zip 安装。',
+          en: 'The name comes from a Chinese proverb: a good bird picks its tree before it lands. Same with job hunting — the early bird catches the worm, but the wise bird checks the tree first. It’s in early access for now: you can download the zip straight from the project page.',
+        },
+        linkText: { zh: '项目主页', en: 'Project page' },
+      },
+      {
+        cat: 'chrome',
+        titleHref: '/douban-rating-ext/',
+        icon: 'img/douban-icon.png',
+        title: { zh: '这豆瓣评分多少？', en: 'What’s the Douban Rating?' },
+        desc: {
+          zh: '看剧、看电影、刷解说、逛搜索页——点一下插件图标，就直接知道这部片的豆瓣多少分。',
+          en: 'Watching a show or movie, browsing recap videos or a search page — just click the extension icon to instantly see the film’s Douban rating.',
+        },
+        think: {
+          zh: '喜欢先看豆瓣再决定看不看这个片子的人有福了（我有福了）。目标是不用费啦吧唧地打开手机搜那个片名——每次看手机最后都会 end up 看了半小时小红书，电脑都黑屏了……',
+          en: 'A blessing for anyone who likes to check Douban before deciding whether to watch something (a blessing for me). The goal: no more fumbling for your phone to search the title — every time I pick up my phone I end up half an hour deep in Xiaohongshu and the computer has already gone dark…',
+        },
+        linkText: { zh: '项目主页', en: 'Project page' },
+        storeHref: 'https://chromewebstore.google.com/detail/necllgpdfffbdcgenhlgoimhnjfjdkkp',
+        storeText: { zh: '在 Chrome 应用商店安装', en: 'Get it on the Chrome Web Store' },
+      },
+    ];
+
+    /* ==================== 渲染 & 语言切换 ==================== */
+    (function () {
+      const cols = document.querySelectorAll('#cards .col');
+      const cardsWrap = document.getElementById('cards');
+      const filterBar = document.getElementById('filters');
+      const countEl = document.getElementById('work-count');
+      const langToggle = document.getElementById('langToggle');
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+      // 切换分类时，让卡片列表整体淡出→重排→淡入，避免瞬间跳变
+      function switchCat(cat) {
+        if (currentCat === cat) return;
+        currentCat = cat;
+        if (reduceMotion.matches) { layout(); return; }
+        cardsWrap.classList.add('switching');
+        setTimeout(() => {
+          layout();
+          requestAnimationFrame(() => { cardsWrap.classList.remove('switching'); });
+        }, 160);
+      }
+
+      // 决定初始语言：localStorage > 浏览器语言 > 中文
+      const saved = localStorage.getItem('lang');
+      let lang = (saved === 'zh' || saved === 'en')
+        ? saved
+        : ((navigator.language || 'zh').toLowerCase().startsWith('zh') ? 'zh' : 'en');
+
+      let currentCat = 'all';
+
+      // 一次性生成卡片元素（顺序与 PROJECTS 对应），文案随语言更新
+      const cardEls = PROJECTS.map(p => {
+        const el = document.createElement('article');
+        el.className = 'card';
+        el.dataset.cat = p.cat;
+        el.innerHTML =
+          '<div class="kicker"></div>' +
+          '<h3>' + (p.icon ? '<img class="ico" src="' + p.icon + '" alt="" width="30" height="30">' : '') + (p.titleHref
+            ? '<a href="' + p.titleHref + '" target="_blank" rel="noopener">' + (p.logo ? LOGOS[p.logo] : '') + '<span class="tt"></span></a>'
+            : '<span></span>') + '</h3>' +
+          '<p class="desc"></p>' +
+          '<p class="think"></p>' +
+          '<div class="links"><a href="' + p.titleHref + '" target="_blank" rel="noopener">' +
+            '<span class="lt"></span> <span class="arr">→</span></a>' +
+            (p.storeHref
+              ? '<a class="store" href="' + p.storeHref + '" target="_blank" rel="noopener">' +
+                '<span class="st"></span> <span class="arr">→</span></a>'
+              : '') + '</div>';
+        cols[0].appendChild(el);
+        return el;
+      });
+
+      function layout() {
+        const visible = cardEls.filter(c => currentCat === 'all' || c.dataset.cat === currentCat);
+        cardEls.forEach(c => c.classList.toggle('hide', !visible.includes(c)));
+        // 左右交替放置：第 1 个在左、第 2 个在右……阅读顺序按行排列
+        visible.forEach((c, i) => cols[i % 2].appendChild(c));
+        // 隐藏的卡片挪到右列末尾（display:none，不影响排版）
+        cardEls.filter(c => !visible.includes(c)).forEach(c => cols[1].appendChild(c));
+        countEl.textContent = '· ' + visible.length;
+      }
+
+      function buildFilters() {
+        filterBar.innerHTML = '';
+        const cats = ['all', ...new Set(PROJECTS.map(p => p.cat))];
+        cats.forEach(cat => {
+          const btn = document.createElement('button');
+          btn.className = 'chip' + (cat === currentCat ? ' on' : '');
+          btn.textContent = cat === 'all' ? UI[lang].all : CATS[cat][lang];
+          btn.addEventListener('click', () => {
+            filterBar.querySelectorAll('.chip').forEach(c => c.classList.remove('on'));
+            btn.classList.add('on');
+            switchCat(cat);
+          });
+          filterBar.appendChild(btn);
+        });
+      }
+
+      function applyLang() {
+        const t = UI[lang];
+        document.documentElement.lang = t.htmlLang;
+        document.getElementById('metaDesc').setAttribute('content', t.metaDesc);
+        document.getElementById('navWorks').textContent = t.navWorks;
+        document.getElementById('navAbout').textContent = t.navAbout;
+        document.getElementById('heroTitle').innerHTML = t.heroTitle;
+        document.getElementById('heroSub').textContent = t.heroSub;
+        document.getElementById('worksLabel').textContent = t.works;
+        document.getElementById('aboutTitle').textContent = t.about;
+        document.getElementById('about1').textContent = t.about1;
+        document.getElementById('about2').textContent = t.about2;
+
+        // 卡片文案
+        cardEls.forEach((el, i) => {
+          const p = PROJECTS[i];
+          el.querySelector('.kicker').textContent = CATS[p.cat][lang];
+          (el.querySelector('h3 .tt') || el.querySelector('h3 a, h3 span')).textContent = p.title[lang];
+          el.querySelector('.desc').innerHTML = p.desc[lang];
+          el.querySelector('.think').innerHTML = '<b>' + t.thoughts + '</b>' + p.think[lang];
+          el.querySelector('.links .lt').textContent = p.linkText[lang];
+          const st = el.querySelector('.links .st');
+          if (st) st.textContent = p.storeText[lang];
+        });
+
+        // 语言开关高亮
+        langToggle.querySelectorAll('button').forEach(b =>
+          b.classList.toggle('on', b.dataset.lang === lang));
+
+        buildFilters();
+        layout();
+      }
+
+      langToggle.querySelectorAll('button').forEach(b => {
+        b.addEventListener('click', () => {
+          if (lang === b.dataset.lang) return;
+          lang = b.dataset.lang;
+          localStorage.setItem('lang', lang);
+          applyLang();
+        });
+      });
+
+      applyLang();
+    })();
+
+    /* ---------- 滚动浮现 ---------- */
+    (function () {
+      const io = new IntersectionObserver((entries) => {
+        // 同一批进入视口的卡片依次错开 50ms，读起来像一次协调的入场，而非同时弹出
+        entries.filter(e => e.isIntersecting).forEach((e, i) => {
+          e.target.style.transitionDelay = (Math.min(i, 6) * 50) + 'ms';
+          e.target.classList.add('in');
+          io.unobserve(e.target);
+        });
+      }, { threshold: 0.08 });
+      document.querySelectorAll('.card, .about-body').forEach(el => {
+        el.classList.add('reveal');
+        io.observe(el);
+      });
+    })();
+  </script>
+</body>
+</html>

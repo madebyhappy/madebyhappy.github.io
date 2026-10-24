@@ -1,0 +1,5 @@
+# macOS
+.DS_Store
+
+# 本地预览配置
+.claude/
