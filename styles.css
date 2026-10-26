@@ -62,7 +62,7 @@ a:hover { text-decoration: underline; }
   justify-content: space-between;
   height: 60px;
 }
-.brand { font-weight: 800; font-size: 16px; color: var(--ink); letter-spacing: -0.01em; }
+.brand { font-weight: 800; font-size: 16px; color: var(--ink); letter-spacing: -0.01em; white-space: nowrap; }
 .brand .by { color: var(--faint); font-weight: 500; }
 .brand .dot { color: var(--accent); }
 .brand:hover { text-decoration: none; color: var(--accent); }
@@ -70,6 +70,7 @@ a:hover { text-decoration: underline; }
 .nav-links a {
   color: var(--muted); font-size: 14px; font-weight: 500;
   position: relative; padding: 4px 0;
+  white-space: nowrap;
 }
 .nav-links a::after {
   content: ""; position: absolute; left: 0; bottom: 0;
@@ -103,7 +104,12 @@ a:hover { text-decoration: underline; }
 .lang-toggle button:hover { color: var(--ink); }
 .lang-toggle button:active { transform: scale(0.97); }
 .lang-toggle button.on { color: #fff; background: var(--accent); }
-@media (max-width: 520px) { .nav-right { gap: 14px; } .nav-links { gap: 18px; } }
+@media (max-width: 520px) { .nav-right { gap: 12px; } .nav-links { gap: 14px; } }
+/* 窄屏放不下一行：标识单独一行，菜单和语言切换排到第二行 */
+@media (max-width: 440px) {
+  .nav .wrap { height: auto; flex-wrap: wrap; row-gap: 4px; padding-top: 10px; padding-bottom: 10px; }
+  .nav-right { width: 100%; justify-content: space-between; }
+}
 
 /* ---------- hero ---------- */
 .hero {

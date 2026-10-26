@@ -6,7 +6,7 @@
   <title>Made by Happy</title>
   <meta name="description" id="metaDesc" content="Happy 做出来的有用或有趣的东西。" />
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-  <link rel="stylesheet" href="styles.css?v=2" />
+  <link rel="stylesheet" href="styles.css?v=3" />
 </head>
 <body>
   <nav class="nav">
@@ -16,6 +16,7 @@
         <div class="nav-links">
           <a href="#works" id="navWorks"></a>
           <a href="#about" id="navAbout"></a>
+          <a href="mailto:contact@madebyhappy.dev" id="navContact"></a>
         </div>
         <!-- 语言切换：默认跟随浏览器语言，选择后记住 -->
         <div class="lang-toggle" id="langToggle" role="group" aria-label="Language">
@@ -87,6 +88,7 @@
         htmlLang: 'zh-CN',
         navWorks: '作品',
         navAbout: '关于',
+        navContact: '联系',
         heroTitle: '一些有趣的东西和想法<span class="dot">。</span>',
         heroSub: '人生的意义就在于思考和折腾！',
         works: '作品',
@@ -101,6 +103,7 @@
         htmlLang: 'en',
         navWorks: 'Works',
         navAbout: 'About',
+        navContact: 'Contact',
         heroTitle: 'Some fun things and ideas<span class="dot">.</span>',
         heroSub: 'The meaning of life is to think and tinker!',
         works: 'Works',
@@ -173,8 +176,8 @@
           en: 'I love watching shows with danmaku on — shipping the couple together with fellow fans sends my happiness (and laughter) through the roof! Videos can be taken down at any moment and their danmaku vanish with them, so I built this extension to keep them safe — and to watch danmaku offline, too!',
         },
         linkText: { zh: '项目主页', en: 'Project page' },
-        storeHref: '/bilibili-danmu/#install',
-        storeText: { zh: '下载安装', en: 'Download & install' },
+        storeHref: 'https://chromewebstore.google.com/detail/bnnjcmnmblnjjkampoilckjbakigpnhm',
+        storeText: { zh: '在 Chrome 应用商店安装', en: 'Get it on the Chrome Web Store' },
       },
       {
         cat: 'chrome',
@@ -292,6 +295,7 @@
         document.getElementById('metaDesc').setAttribute('content', t.metaDesc);
         document.getElementById('navWorks').textContent = t.navWorks;
         document.getElementById('navAbout').textContent = t.navAbout;
+        document.getElementById('navContact').textContent = t.navContact;
         document.getElementById('heroTitle').innerHTML = t.heroTitle;
         document.getElementById('heroSub').textContent = t.heroSub;
         document.getElementById('worksLabel').textContent = t.works;
